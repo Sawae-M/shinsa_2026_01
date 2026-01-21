@@ -2,7 +2,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Animator))]
-public class UnityChanController_NoCamera : MonoBehaviour
+public class PlayerMove : MonoBehaviour
 {
     [Header("ˆÚ“®İ’è")]
     [SerializeField] private float movePower = 30f;
