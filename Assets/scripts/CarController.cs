@@ -4,11 +4,28 @@ public class CarController : MonoBehaviour
 {
     public float moveSpeed = 1500f;
     public float turnSpeed = 100f;
+    public Transform spawnPoint;
     private Rigidbody rb;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        rb.centerOfMass = new Vector3(0, -1f, 0);
+
+        if (spawnPoint != null)
+        {
+            // 位置と回転を開始地点に合わせる
+            transform.position = spawnPoint.position;
+            transform.rotation = spawnPoint.rotation;
+
+            // Rigidbodyを使っている場合は、念のため速度もリセット
+            Rigidbody rb = GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
+        }
     }
 
     void FixedUpdate()
