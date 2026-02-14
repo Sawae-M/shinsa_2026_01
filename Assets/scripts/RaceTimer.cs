@@ -1,14 +1,14 @@
 using UnityEngine;
-using TMPro;
+using UnityEngine.UI; // Textを使用するために必要
 using System.Collections;
 
 public class RaceTimer : MonoBehaviour
 {
-    public TextMeshProUGUI countdownText;
-    public TextMeshProUGUI timerText;
+    [Header("UI参照")]
+    public Text countdownText;
+    public Text timerText;
 
-    // 車の制御スクリプト（例：PrometeoCarControllerなど）をここに参照
-    // ここでは単純なGameObjectの有効/無効で制御する例にします
+    [Header("走行制御")]
     public MonoBehaviour carControllerScript;
 
     private float raceTime = 0f;
@@ -27,19 +27,19 @@ public class RaceTimer : MonoBehaviour
         float count = 5f;
         while (count > 0)
         {
-            countdownText.text = count.ToString("0");
+            if (countdownText != null) countdownText.text = count.ToString("0");
             yield return new WaitForSeconds(1f);
             count--;
         }
 
-        countdownText.text = "GO!!";
+        if (countdownText != null) countdownText.text = "GO!!";
 
         // 車を動かせるようにする
         if (carControllerScript != null) carControllerScript.enabled = true;
         isRacing = true;
 
         yield return new WaitForSeconds(1f);
-        countdownText.gameObject.SetActive(false);
+        if (countdownText != null) countdownText.gameObject.SetActive(false);
     }
 
     void Update()
@@ -47,11 +47,24 @@ public class RaceTimer : MonoBehaviour
         if (isRacing)
         {
             raceTime += Time.deltaTime;
-            // 00:00.00 形式で表示
-            timerText.text = string.Format("{0:00}:{1:00}.{2:00}",
-                Mathf.FloorToInt(raceTime / 60),
-                Mathf.FloorToInt(raceTime % 60),
-                Mathf.FloorToInt((raceTime * 100) % 100));
+            UpdateTimerDisplay();
         }
+    }
+
+    void UpdateTimerDisplay()
+    {
+        if (timerText != null)
+        {
+            int minutes = Mathf.FloorToInt(raceTime / 60);
+            int seconds = Mathf.FloorToInt(raceTime % 60);
+            int milliseconds = Mathf.FloorToInt((raceTime * 100) % 100);
+            timerText.text = string.Format("{0:00}:{1:00}.{2:00}", minutes, seconds, milliseconds);
+        }
+    }
+
+    // ゴール時に外部から呼ぶためのメソッド
+    public void StopTimer()
+    {
+        isRacing = false;
     }
 }
