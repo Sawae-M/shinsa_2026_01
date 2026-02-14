@@ -66,5 +66,8 @@ public class RaceTimer : MonoBehaviour
     public void StopTimer()
     {
         isRacing = false;
+        // 現在のタイムを一時保存（リザルトシーンで読み取る用）
+        PlayerPrefs.SetFloat("LastRunTime", raceTime);
+        PlayerPrefs.Save();
     }
 }
