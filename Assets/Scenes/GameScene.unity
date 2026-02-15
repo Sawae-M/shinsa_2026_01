@@ -768,6 +768,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: l10km_cc4_sl20_t(12123025)_rw10_wh3_n3_RsBTW_MeshV00
       objectReference: {fileID: 0}
+    - target: {fileID: 168298, guid: b0f31f923c387984fbd37ef155b98609, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 168298, guid: b0f31f923c387984fbd37ef155b98609, type: 3}
+      propertyPath: m_TagString
+      value: Ground
+      objectReference: {fileID: 0}
     - target: {fileID: 472234, guid: b0f31f923c387984fbd37ef155b98609, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1320,7 +1328,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1306685538}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 86bf9c8008f43ff42b7c34f789f1fb91, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1359,8 +1367,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d7f91f3a0a52744da3c407503626505, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 1500
-  turnSpeed: 50
+  moveSpeed: 4000
+  turnSpeed: 100
+  maxSpeed: 50
+  downForce: 1000
   spawnPoint: {fileID: 53450508}
 --- !u!114 &1306685548
 MonoBehaviour:
@@ -1543,7 +1553,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 474748, guid: 2cd5d52bec1bbd74aa18e7ef142a8cd0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 24.95
+      value: 24.97
       objectReference: {fileID: 0}
     - target: {fileID: 474748, guid: 2cd5d52bec1bbd74aa18e7ef142a8cd0, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1811,7 +1821,7 @@ Transform:
   m_GameObject: {fileID: 1603143389}
   serializedVersion: 2
   m_LocalRotation: {x: 0.23024188, y: -0.18518707, z: 0.044679444, w: 0.9543051}
-  m_LocalPosition: {x: -2.9399998, y: 33.940002, z: 6.0199995}
+  m_LocalPosition: {x: -2.9399998, y: 33.96, z: 6.0199995}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1995,7 +2005,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movePower: 30
+  maxSpeed: 20
   rotationSpeed: 15
+  downForce: 10
+  rayDistance: 1
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &1660957754
 GameObject:
   m_ObjectHideFlags: 0
@@ -2292,7 +2308,7 @@ Transform:
   m_GameObject: {fileID: 1692594519}
   serializedVersion: 2
   m_LocalRotation: {x: 0.23024188, y: -0.18518707, z: 0.044679444, w: 0.9543051}
-  m_LocalPosition: {x: -2.9399998, y: 33.940002, z: 6.0199995}
+  m_LocalPosition: {x: -2.9399998, y: 33.96, z: 6.0199995}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

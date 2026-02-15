@@ -4,23 +4,27 @@
 public class CarController : MonoBehaviour
 {
     [Header("移動設定")]
-    public float moveSpeed = 5000f;  // 数値を大きめに調整
+    public float moveSpeed = 5000f;  // 動かない場合はここを大きく
     public float turnSpeed = 100f;
-    public float maxSpeed = 20f;
-    public float downForce = 5000f; // 浮き上がり防止に強めに設定
+    public float maxSpeed = 30f;
 
-    [Header("接地設定")]
-    public float rayDistance = 1.5f; // 車高に合わせて調整
-    public Vector3 rayOffset = new Vector3(0.5f, 0, 0.5f); // センサーを四隅に広げる幅
+    [Header("浮き上がり防止設定")]
+    public float downForce = 8000f; // 地面に吸い付かせるための強い力
 
     public Transform spawnPoint;
     private Rigidbody rb;
-    private bool isGrounded;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.centerOfMass = new Vector3(0, -1f, 0); // 重心を低く保つ
+
+        // 重心を低くして安定させる
+        rb.centerOfMass = new Vector3(0, -1f, 0);
+
+        // Rigidbodyの基本設定をスクリプトから固定
+        rb.useGravity = true;
+        rb.drag = 0.5f;           // 空中で加速しすぎないための抵抗
+        rb.angularDrag = 0.5f;    // 回転が止まりやすくする
 
         if (spawnPoint != null)
         {
@@ -33,64 +37,21 @@ public class CarController : MonoBehaviour
 
     void FixedUpdate()
     {
-        // 1. 4隅のセンサーで接地判定を強化
-        CheckGroundedExtended();
-
         float moveInput = Input.GetAxis("Vertical");
         float turnInput = Input.GetAxis("Horizontal");
 
-        // 2. 移動処理（地面にいる時だけ加速する！）
-        if (isGrounded)
+        // 1. 移動処理（接地判定なしで常に実行）
+        // 最高速度を超えていない時だけ力を加える
+        if (rb.linearVelocity.magnitude < maxSpeed)
         {
-            if (rb.linearVelocity.magnitude < maxSpeed)
-            {
-                rb.AddForce(transform.forward * moveInput * moveSpeed * Time.fixedDeltaTime, ForceMode.Force);
-            }
+            rb.AddForce(transform.forward * moveInput * moveSpeed * Time.fixedDeltaTime, ForceMode.Force);
         }
 
-        // 3. 回転処理
+        // 2. 回転処理
         transform.Rotate(Vector3.up * turnInput * turnSpeed * Time.fixedDeltaTime);
 
-        // 4. 強力なダウンフォース（空中にいても常に下へ引っ張る）
+        // 3. ダウンフォース
+        // 空を飛ばないように、常に強力な下向きの力を加え続ける
         rb.AddForce(Vector3.down * downForce * Time.fixedDeltaTime, ForceMode.Force);
-    }
-
-    // 4つのポイントで地面をチェックする
-    void CheckGroundedExtended()
-    {
-        isGrounded = false;
-        // チェックする4つの位置（前右、前左、後右、後左）
-        Vector3[] offsets = {
-            new Vector3(rayOffset.x, 0, rayOffset.z),
-            new Vector3(-rayOffset.x, 0, rayOffset.z),
-            new Vector3(rayOffset.x, 0, -rayOffset.z),
-            new Vector3(-rayOffset.x, 0, -rayOffset.z)
-        };
-
-        foreach (var offset in offsets)
-        {
-            Vector3 rayStart = transform.TransformPoint(offset + Vector3.up * 0.1f);
-            if (Physics.Raycast(rayStart, Vector3.down, rayDistance))
-            {
-                isGrounded = true;
-                break; // どこか1つでも当たれば接地とみなす
-            }
-        }
-    }
-
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.green;
-        Vector3[] offsets = {
-            new Vector3(rayOffset.x, 0, rayOffset.z),
-            new Vector3(-rayOffset.x, 0, rayOffset.z),
-            new Vector3(rayOffset.x, 0, -rayOffset.z),
-            new Vector3(-rayOffset.x, 0, -rayOffset.z)
-        };
-        foreach (var offset in offsets)
-        {
-            Vector3 rayStart = transform.TransformPoint(offset + Vector3.up * 0.1f);
-            Gizmos.DrawLine(rayStart, rayStart + Vector3.down * rayDistance);
-        }
     }
 }
