@@ -35,14 +35,14 @@ public class GoalManager : MonoBehaviour
 
         // 2. UI表示
         if (goalUIPanel != null) goalUIPanel.SetActive(true);
-        if (goalText != null) goalText.text = "ゴール！";
+        if (goalText != null) goalText.text = "GOAL!!";
 
         // タイマーを止める（後述のRaceTimerを止める場合）
         RaceTimer timer = FindObjectOfType<RaceTimer>();
         if (timer != null) timer.StopTimer();
 
         // 3. 5秒待機
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(3f);
 
         // 4. シーン遷移
         SceneManager.LoadScene(resultSceneName);
