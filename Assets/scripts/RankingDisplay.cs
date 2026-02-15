@@ -3,10 +3,10 @@ using UnityEngine.UI;
 
 public class RankingDisplay : MonoBehaviour
 {
-    [Header("1位?10位のTextを順番に入れてください")]
+    [Header("10個のText（No.1用?No.10用）を順番にアタッチ")]
     public Text[] rankTexts;
 
-    void OnEnable() // 画面が開かれるたびに更新
+    void OnEnable()
     {
         ShowRanking();
     }
@@ -15,15 +15,19 @@ public class RankingDisplay : MonoBehaviour
     {
         for (int i = 0; i < rankTexts.Length; i++)
         {
-            float time = PlayerPrefs.GetFloat("Rank" + (i + 1), 0f);
+            // Rank1, Rank2... という名前で保存されている値を取得
+            float time = PlayerPrefs.GetFloat("Rank" + (i + 1), 9999f);
 
-            if (time <= 0f || time >= 999f)
+            // 順位ラベルを作成（No.1, No.2...）
+            string rankLabel = "No." + (i + 1) + " ";
+
+            if (time >= 9999f || time <= 0f)
             {
-                rankTexts[i].text = "No." + (i + 1) + " --:--.--";
+                rankTexts[i].text = rankLabel + "--:--.--";
             }
             else
             {
-                rankTexts[i].text = "No. " + (i + 1) +  FormatTime(time);
+                rankTexts[i].text = rankLabel + FormatTime(time);
             }
         }
     }
