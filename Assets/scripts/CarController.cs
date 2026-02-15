@@ -12,10 +12,11 @@ public class CarController : MonoBehaviour
     public float downForce = 8000f;
 
     public Transform spawnPoint;
-    private Rigidbody rb;
-
-    // 変数名を smokeEffects に統一
     public ParticleSystem[] smokeEffects;
+
+    private Rigidbody rb;
+    private float moveInput;
+    private float turnInput;
 
     void Start()
     {
@@ -23,8 +24,9 @@ public class CarController : MonoBehaviour
         rb.centerOfMass = new Vector3(0, -1f, 0);
 
         rb.useGravity = true;
-        rb.drag = 0.5f;
-        rb.angularDrag = 0.5f;
+        // Dragを少し上げると挙動が安定します
+        rb.drag = 1.0f;
+        rb.angularDrag = 1.0f;
 
         if (spawnPoint != null)
         {
@@ -35,29 +37,41 @@ public class CarController : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        // 入力の取得は Update で行う（ガクつき防止に重要）
+        moveInput = Input.GetAxis("Vertical");
+        turnInput = Input.GetAxis("Horizontal");
+    }
+
     void FixedUpdate()
     {
-        float moveInput = Input.GetAxis("Vertical");
-        float turnInput = Input.GetAxis("Horizontal");
-
-        // 1. 移動処理
-        if (rb.linearVelocity.magnitude < maxSpeed)
-        {
-            rb.AddForce(transform.forward * moveInput * moveSpeed * Time.fixedDeltaTime, ForceMode.Force);
-        }
+        // 1. 移動処理（滑らかな加速）
+        ApplyMovement();
 
         // 2. 回転処理
         transform.Rotate(Vector3.up * turnInput * turnSpeed * Time.fixedDeltaTime);
 
-        // 3. ダウンフォース
+        // 3. ダウンフォース（少しマイルドにする、または地面との距離で調整）
         rb.AddForce(Vector3.down * downForce * Time.fixedDeltaTime, ForceMode.Force);
 
-        // エフェクトの更新を呼び出す
+        // エフェクトの更新
         HandleEffects(moveInput);
     }
 
-    // メソッドは FixedUpdate の「外」に定義します
-    void HandleEffects(float moveInput)
+    void ApplyMovement()
+    {
+        // 現在の進行方向への速度を計算
+        float currentForwardSpeed = Vector3.Dot(rb.linearVelocity, transform.forward);
+
+        // 最高速度に近づいたら加える力を徐々に弱めることでガクつきを抑える
+        if (Mathf.Abs(currentForwardSpeed) < maxSpeed)
+        {
+            rb.AddForce(transform.forward * moveInput * moveSpeed * Time.fixedDeltaTime, ForceMode.Force);
+        }
+    }
+
+    void HandleEffects(float input)
     {
         if (smokeEffects == null) return;
 
@@ -66,8 +80,8 @@ public class CarController : MonoBehaviour
             if (smoke != null)
             {
                 var emission = smoke.emission;
-                // 入力がある（動いている）時だけ煙を出す
-                emission.enabled = Mathf.Abs(moveInput) > 0.1f;
+                // 入力の絶対値で判定
+                emission.enabled = Mathf.Abs(input) > 0.1f;
             }
         }
     }
