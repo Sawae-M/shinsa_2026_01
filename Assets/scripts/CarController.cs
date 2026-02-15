@@ -4,27 +4,27 @@
 public class CarController : MonoBehaviour
 {
     [Header("移動設定")]
-    public float moveSpeed = 5000f;  // 動かない場合はここを大きく
+    public float moveSpeed = 5000f;
     public float turnSpeed = 100f;
     public float maxSpeed = 30f;
 
     [Header("浮き上がり防止設定")]
-    public float downForce = 8000f; // 地面に吸い付かせるための強い力
+    public float downForce = 8000f;
 
     public Transform spawnPoint;
     private Rigidbody rb;
 
+    // 変数名を smokeEffects に統一
+    public ParticleSystem[] smokeEffects;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-
-        // 重心を低くして安定させる
         rb.centerOfMass = new Vector3(0, -1f, 0);
 
-        // Rigidbodyの基本設定をスクリプトから固定
         rb.useGravity = true;
-        rb.drag = 0.5f;           // 空中で加速しすぎないための抵抗
-        rb.angularDrag = 0.5f;    // 回転が止まりやすくする
+        rb.drag = 0.5f;
+        rb.angularDrag = 0.5f;
 
         if (spawnPoint != null)
         {
@@ -40,8 +40,7 @@ public class CarController : MonoBehaviour
         float moveInput = Input.GetAxis("Vertical");
         float turnInput = Input.GetAxis("Horizontal");
 
-        // 1. 移動処理（接地判定なしで常に実行）
-        // 最高速度を超えていない時だけ力を加える
+        // 1. 移動処理
         if (rb.linearVelocity.magnitude < maxSpeed)
         {
             rb.AddForce(transform.forward * moveInput * moveSpeed * Time.fixedDeltaTime, ForceMode.Force);
@@ -51,7 +50,25 @@ public class CarController : MonoBehaviour
         transform.Rotate(Vector3.up * turnInput * turnSpeed * Time.fixedDeltaTime);
 
         // 3. ダウンフォース
-        // 空を飛ばないように、常に強力な下向きの力を加え続ける
         rb.AddForce(Vector3.down * downForce * Time.fixedDeltaTime, ForceMode.Force);
+
+        // エフェクトの更新を呼び出す
+        HandleEffects(moveInput);
+    }
+
+    // メソッドは FixedUpdate の「外」に定義します
+    void HandleEffects(float moveInput)
+    {
+        if (smokeEffects == null) return;
+
+        foreach (ParticleSystem smoke in smokeEffects)
+        {
+            if (smoke != null)
+            {
+                var emission = smoke.emission;
+                // 入力がある（動いている）時だけ煙を出す
+                emission.enabled = Mathf.Abs(moveInput) > 0.1f;
+            }
+        }
     }
 }
