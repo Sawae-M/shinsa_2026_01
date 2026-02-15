@@ -1,10 +1,18 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
 
 public class ResultManager : MonoBehaviour
 {
     public Text resultTimeText;
+    public Text[] rankTexts;
+
+    [Header("ランクイン演出")]
+    public AudioSource audioSource; // 音を鳴らすスピーカー
+    public AudioClip rankInSE;    // ランクインした時の特殊な効果音
+
+    private int myRankIndex = -1;
 
     void Start()
     {
@@ -12,31 +20,65 @@ public class ResultManager : MonoBehaviour
         if (lastTime > 0)
         {
             resultTimeText.text = FormatTime(lastTime);
-            UpdateRanking(lastTime);
+            UpdateAndShowRanking(lastTime);
         }
     }
 
-    void UpdateRanking(float newTime)
+    void UpdateAndShowRanking(float newTime)
     {
         List<float> times = new List<float>();
 
-        // 1. 現在の1?10位を取得
         for (int i = 1; i <= 10; i++)
         {
-            float savedTime = PlayerPrefs.GetFloat("Rank" + i, 9999f); // 初期値は十分に大きな値
+            float savedTime = PlayerPrefs.GetFloat("Rank" + i, 9999f);
             times.Add(savedTime);
         }
 
-        // 2. 新しいタイムを追加してソート（昇順：早い順）
         times.Add(newTime);
         times.Sort();
 
-        // 3. 上位10個を「Rank1」?「Rank10」として再保存
+        myRankIndex = times.IndexOf(newTime);
+
         for (int i = 0; i < 10; i++)
         {
-            PlayerPrefs.SetFloat("Rank" + (i + 1), times[i]);
+            float timeValue = times[i];
+            PlayerPrefs.SetFloat("Rank" + (i + 1), timeValue);
+
+            string rankLabel = "No." + (i + 1) + " ";
+            if (timeValue >= 9999f)
+            {
+                rankTexts[i].text = rankLabel + "--:--.--";
+            }
+            else
+            {
+                rankTexts[i].text = rankLabel + FormatTime(timeValue);
+            }
         }
         PlayerPrefs.Save();
+
+        // --- ここから追加：ランクイン時の特殊演出 ---
+        if (myRankIndex >= 0 && myRankIndex < 10)
+        {
+            // 1. 特殊な効果音を1回鳴らす
+            if (audioSource != null && rankInSE != null)
+            {
+                audioSource.PlayOneShot(rankInSE);
+            }
+
+            // 2. 点滅を開始
+            StartCoroutine(FlashMyRank(rankTexts[myRankIndex]));
+        }
+    }
+
+    IEnumerator FlashMyRank(Text targetText)
+    {
+        while (true)
+        {
+            targetText.color = Color.red;
+            yield return new WaitForSeconds(0.3f);
+            targetText.color = Color.yellow;
+            yield return new WaitForSeconds(0.3f);
+        }
     }
 
     string FormatTime(float time)
