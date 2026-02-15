@@ -25,8 +25,8 @@ public class CarController : MonoBehaviour
 
         rb.useGravity = true;
         // Dragを少し上げると挙動が安定します
-        rb.drag = 1.0f;
-        rb.angularDrag = 1.0f;
+        rb.linearDamping = 1.0f;
+        rb.angularDamping = 1.0f;
 
         if (spawnPoint != null)
         {
