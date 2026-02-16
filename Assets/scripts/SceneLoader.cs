@@ -1,16 +1,19 @@
+using System.Collections; // コルーチンを使うために必要
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using System.Collections; // コルーチンを使うために必要
 
 public class SceneLoader : MonoBehaviour
 {
     public string nextSceneName;      // 遷移先シーン名
     [SerializeField] private Image fadeImage; // フェード用のImageをアタッチ
     [SerializeField] private float fadeDuration = 3.0f; // フェードにかける時間
+    [SerializeField] public AudioSource audioSource;
+    [SerializeField] public AudioClip SE;
 
     public void OnClick()
     {
+        audioSource.PlayOneShot(SE);
         // 直接シーンをロードせず、コルーチンを開始する
         StartCoroutine(FadeAndLoadScene());
     }

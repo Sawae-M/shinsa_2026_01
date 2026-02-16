@@ -10,17 +10,23 @@ public class CarDrift : MonoBehaviour
     public float boostForce = 500f;
 
     [Header("Drift Logic")]
-    [Tooltip("この角度（度）以上の横滑りがあればドリフトとみなす")]
     public float minDriftAngle = 10f;
 
     [Header("Audio Settings")]
-    public AudioSource successAudio;  // 成功時の音
-    public AudioSource failureAudio;  // 失敗時の音
+    public AudioSource successAudio;
+    public AudioSource failureAudio;
+
+    [Header("Effect Settings")]
+    // 追加：青い炎のエフェクト（複数対応）
+    public ParticleSystem[] boostFlames;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.linearDamping = normalDrag;
+
+        // 開始時はエフェクトを止めておく
+        StopBoostFlames();
     }
 
     void Update()
@@ -34,24 +40,43 @@ public class CarDrift : MonoBehaviour
         {
             rb.linearDamping = normalDrag;
 
-            // --- ここが修正ポイント ---
-
-            // 1. 車の正面方向 (Forward) と 現在の進行方向 (Velocity) の角度差を計算
             float driftAngle = Vector3.Angle(transform.forward, rb.linearVelocity);
 
-            // 2. 一定以上の角度差があり、かつ速度が出ている時だけブースト
             if (driftAngle > minDriftAngle && rb.linearVelocity.magnitude > 1f)
             {
+                // ドリフト成功
                 rb.AddForce(transform.forward * boostForce, ForceMode.Impulse);
-                Debug.Log("Drift Boost! Angle: " + driftAngle);
+
+                // 追加：ブーストエフェクト再生
+                PlayBoostFlames();
 
                 if (successAudio != null) successAudio.PlayOneShot(successAudio.clip);
             }
             else
             {
-                Debug.Log("No Boost (Going Straight). Angle: " + driftAngle);
                 if (failureAudio != null) failureAudio.PlayOneShot(failureAudio.clip);
             }
+        }
+    }
+
+    // エフェクトを一斉に再生するメソッド
+    void PlayBoostFlames()
+    {
+        foreach (var flame in boostFlames)
+        {
+            if (flame != null)
+            {
+                flame.Play(); // 再生開始
+            }
+        }
+    }
+
+    // エフェクトを強制停止する（必要ならStart時などに呼ぶ）
+    void StopBoostFlames()
+    {
+        foreach (var flame in boostFlames)
+        {
+            if (flame != null) flame.Stop();
         }
     }
 }
